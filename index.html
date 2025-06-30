@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Tỏ Tình Yêu Thương</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom, #a3d4ff, #d6f0ff);
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      user-select: none;
+    }
+
+    .popup {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.95);
+      color: #003366;
+      padding: 14px 20px;
+      border-radius: 18px;
+      box-shadow: 0 0 12px #3399ff88;
+      font-weight: 600;
+      font-size: 15px;
+      user-select: none;
+      pointer-events: none;
+      max-width: 240px;
+      line-height: 1.3;
+    }
+
+    #love-message {
+      position: fixed;
+      bottom: 10px;
+      width: 100%;
+      white-space: nowrap;
+      font-size: 20px;
+      font-weight: bold;
+      color: #3399ff;
+      background-color: #a0c8ff;
+      padding: 8px 0;
+      overflow: hidden;
+      box-sizing: border-box;
+      border-radius: 10px;
+      z-index: 5;
+    }
+
+    #love-message span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: scroll-text 100s linear infinite;
+    }
+
+    @keyframes scroll-text {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .falling-heart, .falling-snow {
+      position: fixed;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      opacity: 0.8;
+      z-index: 1;
+      animation: fall linear forwards;
+    }
+
+    .falling-heart {
+      background: #3399ff;
+      transform: rotate(45deg);
+    }
+
+    .falling-snow {
+      background: white;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(-10px) rotate(0); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+    }
+
+    .heart-cursor {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: #3399ff;
+      transform: rotate(45deg);
+      border-radius: 3px;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.9;
+    }
+
+    .heart-cursor::before,
+    .heart-cursor::after {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #66b3ff;
+      border-radius: 50%;
+    }
+
+    .heart-cursor::before { top: -5px; left: 0; }
+    .heart-cursor::after { top: 0; left: -5px; }
+
+    #start-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 40px 50px;
+      border-radius: 25px;
+      box-shadow: 0 0 25px #3399ffaa;
+      text-align: center;
+      z-index: 10000;
+    }
+
+    #start-popup h2 {
+      margin-bottom: 20px;
+      font-size: 28px;
+      color: #0066cc;
+    }
+
+    #start-popup button {
+      background: #3399ff;
+      border: none;
+      padding: 15px 35px;
+      border-radius: 15px;
+      font-size: 20px;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #start-popup button:hover {
+      background: #4da6ff;
+    }
+
+    #youtube-embed {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="start-popup">
+    <h2>Em yêu click vào đây 💙</h2>
+    <button id="startBtn">Click</button>
+  </div>
+
+  <div id="love-message" style="display:none;"><span></span></div>
+
+  <!-- YouTube nhạc nền -->
+  <iframe id="youtube-embed" width="0" height="0" src="" frameborder="0"
+    allow="autoplay" allowfullscreen></iframe>
+
+  <script>
+      const questions = [
+  "Em nghĩ gì về tình yêu đích thực?",
+  "Anh sẽ luôn ở bên em, dù chuyện gì xảy ra.",
+  "Em là giấc mơ ngọt ngào nhất mỗi đêm anh chìm vào giấc ngủ.",
+  "Tình yêu của anh dành cho em không bao giờ thay đổi.",
+  "Ký ức đẹp nhất của em trong tình yêu là gì?",
+  "Anh trân trọng từng khoảnh khắc bên em.",
+  "Anh chỉ mong một cái ôm từ em lúc này.",
+  "Em là định mệnh mà anh luôn mong đợi.",
+  "Em có tin vào tình yêu vĩnh cửu không?",
+  "Chỉ cần có em, anh chẳng cần điều gì khác.",
+  "Lúc nào em thấy mình yếu đuối nhất trong tình yêu?",
+  "Từng nhịp tim anh đều gọi tên em.",
+  "Tình yêu lý tưởng của em như thế nào?",
+  "Anh sẽ là chốn bình yên của em mãi mãi.",
+  "Nếu một ngày cả hai cãi nhau, em muốn anh làm gì?",
+  "Anh luôn sẵn sàng lắng nghe em, dù em nói điều gì.",
+  "Em có thấy an toàn khi ở bên người mình yêu không?",
+  "Anh sẽ bảo vệ em khỏi cả thế giới nếu cần.",
+  "Thói quen yêu thích nhất khi yêu của em là gì?",
+  "Mỗi lần được nắm tay em, tim anh lại rung động.",
+  "Em mong đợi điều gì nhất trong một mối quan hệ?",
+  "Tương lai của anh luôn có hình bóng em trong đó.",
+  "Tình yêu có cần cố gắng không, theo em?",
+  "Chỉ cần có em, anh sẽ cố gắng mỗi ngày.",
+  "Nếu em buồn, anh có thể làm gì để em vui?",
+  "Anh muốn là lý do khiến em mỉm cười mỗi sáng.",
+  "Em có từng lo sợ mất người mình yêu chưa?",
+  "Anh sợ mất em hơn bất kỳ điều gì trên đời.",
+  "Tình yêu có chữa lành được tổn thương không?",
+  "Anh muốn cùng em vượt qua mọi vết đau.",
+  "Em cảm thấy thế nào khi được ôm?",
+  "Cái ôm của em là nơi duy nhất anh muốn về.",
+  "Nếu một ngày xa nhau, em sẽ làm gì?",
+  "Anh sẽ viết cho em mỗi ngày một lá thư nhớ.",
+  "Tình yêu cần sự hy sinh đúng không em?",
+  "Anh sẵn sàng hy sinh tất cả vì nụ cười của em.",
+  "Khoảnh khắc em thấy hạnh phúc nhất là khi nào?",
+  "Khi em cười, thế giới trong anh cũng bừng sáng.",
+  "Nếu được chọn lại, em vẫn chọn yêu anh chứ?",
+  "Anh luôn chọn em, dù là kiếp nào đi nữa.",
+  "Em có nghĩ chúng ta sinh ra là dành cho nhau?",
+  "Gặp em là điều may mắn nhất đời anh.",
+  "Kỷ niệm đầu tiên với người yêu là gì?",
+  "Anh không bao giờ quên ngày đầu mình bên nhau.",
+  "Điều gì khiến em cảm thấy đặc biệt nhất?",
+  "Em chính là điều đặc biệt nhất với anh.",
+  "Lúc nào em thấy nhớ người yêu nhất?",
+  "Anh nhớ em từ sáng sớm đến đêm khuya.",
+  "Nếu em khóc, anh sẽ làm gì?",
+  "Anh sẽ ôm em thật chặt và lau nước mắt.",
+  "Em có tin vào chuyện tình lâu dài không?",
+  "Anh muốn bên em đến già, nắm tay không rời.",
+  "Em nghĩ gì về tình yêu đích thực?",
+  "Anh xin lỗi nếu anh từng làm em buồn.",
+  "Điều gì làm em cảm thấy hạnh phúc nhất trong tình yêu?",
+  "Anh yêu em bằng cả trái tim này.",
+  "Nếu được đi đâu đó cùng người yêu, em sẽ chọn nơi nào?",
+  "Anh sẽ nắm tay em đi khắp thế gian.",
+  "Ký ức nào về tình yêu khiến em nhớ nhất?",
+  "Mỗi lần nhớ em, tim anh lại nhói lên.",
+  "Theo em, điều quan trọng nhất trong tình yêu là gì?",
+  "Anh hứa sẽ luôn tôn trọng và lắng nghe em.",
+  "Em muốn người yêu làm gì khi em buồn?",
+  "Anh chỉ muốn ôm em và nói rằng anh ở đây.",
+  "Tình yêu có cần thời gian để vun đắp không?",
+  "Từng giây phút bên em đều quý giá với anh.",
+  "Điều gì khiến em cảm thấy được yêu?",
+  "Anh sẽ làm mọi điều khiến em hạnh phúc.",
+  "Khi em giận, anh nên làm gì để em nguôi?",
+  "Anh xin lỗi nếu anh từng vô tâm với em.",
+  "Nếu có một điều ước cho tình yêu, em sẽ ước gì?",
+  "Anh chỉ ước được bên em mãi mãi.",
+  "Em có tin vào duyên số trong tình yêu?",
+  "Gặp em là định mệnh lớn nhất đời anh.",
+  "Khi yêu, điều gì làm em thấy an toàn nhất?",
+  "Anh muốn là vòng tay chở che cho em.",
+  "Một ngày hoàn hảo với người yêu của em sẽ như thế nào?",
+  "Ngày nào có em cũng là ngày tuyệt vời với anh.",
+  "Tình yêu có cần sự tha thứ không?",
+  "Anh xin lỗi em rất nhiều, mong em thứ tha.",
+  "Nếu một ngày em mệt mỏi, em muốn anh làm gì?",
+  "Anh sẽ im lặng bên cạnh và ôm em thật lâu.",
+  "Khi yêu, em có sợ bị tổn thương không?",
+  "Anh hứa sẽ luôn bảo vệ trái tim em.",
+  "Em mong đợi gì từ anh trong tương lai?",
+  "Anh muốn là người cùng em xây tổ ấm.",
+  "Nếu em thấy cô đơn, em sẽ làm gì?",
+  "Anh sẽ luôn ở đó, ngay cả khi em không gọi.",
+  "Điều gì làm em thấy không thể rời xa người mình yêu?",
+  "Em là tất cả những gì anh từng cầu nguyện.",
+  "Nếu yêu xa, em nghĩ mình sẽ làm thế nào?",
+  "Anh sẽ viết thư, gọi điện, làm mọi thứ để gần em hơn.",
+  "Khi yêu, em có sẵn sàng hy sinh vì người kia không?",
+  "Anh sẵn sàng từ bỏ tất cả chỉ cần có em.",
+  "Em muốn tình yêu của mình kéo dài bao lâu?",
+  "Anh muốn yêu em đến trọn đời.",
+  "Tình yêu có cần sự kiên nhẫn không?",
+  "Anh sẽ đợi, dù bao lâu, chỉ cần em đến.",
+  "Em cảm thấy như thế nào khi được quan tâm?",
+  "Anh chỉ muốn em luôn được yêu thương và chăm sóc.",
+  "Nếu được quay lại quá khứ, em có yêu lại người cũ?",
+  "Anh không muốn quá khứ của em, anh chỉ muốn tương lai cùng em.",
+  "Lúc nào em thấy cần một cái ôm nhất?",
+  "Anh luôn sẵn sàng dang tay cho em tựa vào.",
+  "Em có bao giờ cảm thấy cô đơn dù đang yêu không?",
+  "Anh sẽ luôn lắng nghe và ở bên cạnh em.",
+  "Nếu một ngày em không nói gì, anh có hiểu không?",
+  "Anh sẽ học cách hiểu cả sự im lặng của em.",
+  "Tình yêu có làm em thay đổi không?",
+  "Yêu em khiến anh trở thành phiên bản tốt hơn mỗi ngày.",
+  "Em mong chờ điều gì vào mỗi buổi sáng?",
+  "Anh mong thấy tin nhắn và nụ cười của em.",
+  "Nếu có một lần được nói lời yêu, em sẽ nói gì?",
+  "Anh muốn nghe điều đó mỗi ngày từ em.",
+  "Em có nghĩ rằng yêu là một phép màu không?",
+  "Gặp em là phép màu kỳ diệu nhất cuộc đời anh.",
+  "Khi em tổn thương, em muốn người yêu làm gì?",
+  "Anh sẽ không hỏi, chỉ lặng lẽ ôm em.",
+  "Tình yêu có thể chữa lành nỗi đau không?",
+  "Em là người duy nhất có thể làm anh cảm thấy bình yên.",
+  "Em muốn người yêu nói gì trước khi đi ngủ?",
+  "Anh yêu em, chúc em ngủ ngon và mơ về anh.",
+  "Nếu có một ngày em biến mất, em muốn được nhớ như thế nào?",
+  "Anh sẽ tìm em, nhớ em, yêu em mỗi ngày.",
+  "Em có tin anh yêu em thật lòng không?",
+  "Từng nhịp tim anh đều gọi tên em.",
+  "Nếu yêu là đau, em có chọn yêu không?",
+  "Dù đau, chỉ cần là em, anh vẫn chọn yêu.",
+  "Khi em cười, điều gì khiến em vui đến thế?",
+  "Anh muốn là lý do em cười mỗi ngày.",
+  "Em nghĩ thế nào về câu 'mãi mãi'?",
+  "Anh muốn mãi mãi bên em, không rời.",
+  "Nếu có điều gì khiến em khóc, đó sẽ là gì?",
+  "Nếu nước mắt em rơi, anh muốn là người lau đi.",
+  "Nếu phải xa nhau một thời gian, em nghĩ sao?",
+  "Xa em là điều khó nhất, nhưng anh sẽ đợi.",
+  "Tình yêu có làm em thấy mình tốt đẹp hơn không?",
+  "Yêu em khiến anh biết thế nào là trưởng thành.",
+  "Nếu anh nói sai điều gì, em có tha thứ không?",
+  "Anh xin lỗi, thật lòng xin lỗi nếu từng làm em buồn.",
+  "Em mong đợi gì vào một cái ôm?",
+  "Anh mong cái ôm đó khiến em thấy bình yên.",
+  "Điều gì khiến em tin vào anh?",
+  "Tình yêu anh dành cho em là thật.",
+  "Khi em nhớ, em sẽ làm gì?",
+  "Anh sẽ viết cho em từng câu yêu trong trái tim anh.",
+  "Em có sợ yêu không?",
+  "Nếu sợ, hãy để anh cùng em vượt qua.",
+  "Tình yêu có cần nói ra mỗi ngày không?",
+  "Anh sẽ nói 'anh yêu em' mỗi sáng, trưa, tối.",
+  "Nếu em thấy buồn, hãy gọi anh nhé?",
+  "Anh sẽ đến dù em không nói một lời.",
+  "Yêu em là...",
+  "Yêu em là điều đẹp nhất đời anh."
+];
+
+
+    const loveText = `
+    Anh yêu em bằng tất cả trái tim này. Mỗi ngày trôi qua là một ngày anh nhớ em nhiều hơn. Anh xin lỗi nếu có những lúc khiến em buồn, khiến em tổn thương. Anh chưa bao giờ ngừng yêu em, chưa bao giờ quên đi những điều em mang lại cho anh: sự ấm áp, ánh mắt dịu dàng, cái ôm nhẹ và cả những lần em khóc. Anh nhớ cả những giận hờn, những lần chúng ta im lặng mà trái tim vẫn hướng về nhau. Dù thời gian trôi qua, dù không gian có ngăn cách, tình yêu anh dành cho em luôn vẹn nguyên. Anh ước có thể lau nước mắt cho em mỗi khi em buồn, có thể ở cạnh em mỗi ngày để bảo vệ và yêu em theo cách dịu dàng nhất. Em là người duy nhất khiến anh muốn tốt hơn từng ngày. Xin hãy tha thứ cho mọi sai lầm trong quá khứ. Hãy để anh làm lại từ đầu, với trái tim trọn vẹn dành riêng cho em. Anh hứa sẽ luôn bên em, không bao giờ rời bỏ. Anh cam kết sẽ là người đồng hành cùng em đến cuối con đường, nắm tay em đi qua mọi sóng gió. Chỉ cần em còn tin, còn yêu, thì anh sẽ dùng cả đời mình để chứng minh tình yêu này là thật, là duy nhất, là mãi mãi...
+    `;
+
+    let index = 0;
+
+    function createPopup(text) {
+      const pop = document.createElement('div');
+      pop.className = 'popup';
+      pop.innerText = text;
+      pop.style.top = Math.random() * 80 + 5 + '%';
+      pop.style.left = Math.random() * 80 + 5 + '%';
+      document.body.appendChild(pop);
+    }
+
+    function showPopups() {
+      if (index >= questions.length) return;
+      createPopup(questions[index]);
+      index++;
+      setTimeout(showPopups, 700);
+    }
+
+    function spawnHeartsAndSnow() {
+      setInterval(() => {
+        const item = document.createElement('div');
+        item.className = Math.random() < 0.5 ? 'falling-heart' : 'falling-snow';
+        item.style.left = Math.random() * window.innerWidth + 'px';
+        item.style.animationDuration = (3 + Math.random() * 4) + 's';
+        document.body.appendChild(item);
+        setTimeout(() => item.remove(), 10000);
+      }, 100); // tăng mật độ
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      const heart = document.createElement('div');
+      heart.className = 'heart-cursor';
+      heart.style.left = (e.pageX - 5) + 'px';
+      heart.style.top = (e.pageY - 5) + 'px';
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 1000);
+    });
+
+    function startLove() {
+      document.getElementById('start-popup').style.display = 'none';
+
+      // Phát nhạc từ YouTube
+      const iframe = document.getElementById('youtube-embed');
+      iframe.src = "https://www.youtube.com/embed/tHnOu93RuxY?autoplay=1&loop=1&playlist=tHnOu93RuxY";
+
+      showPopups();
+      spawnHeartsAndSnow();
+
+      const loveMsg = document.getElementById('love-message');
+      loveMsg.style.display = 'block';
+      loveMsg.querySelector('span').innerText = loveText;
+    }
+
+    document.getElementById('startBtn').addEventListener('click', startLove);
+  </script>
+
+</body>
+</html>
